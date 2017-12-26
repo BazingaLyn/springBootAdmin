@@ -1,0 +1,162 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.geekcattle.aijia.mapper.AccountInfoMapper" >
+    <resultMap id="BaseResultMap" type="com.geekcattle.aijia.domain.BaseAccountInfo" >
+        <id column="id" property="id" jdbcType="BIGINT" />
+        <result column="user_id" property="userId" jdbcType="BIGINT" />
+        <result column="account_type" property="accountType" jdbcType="BIGINT" />
+    </resultMap>
+
+    <resultMap id="userResultMap" type="com.geekcattle.aijia.domain.UserInfo" >
+        <id column="id" property="userId" jdbcType="BIGINT" />
+        <result column="mobile" property="mobile" jdbcType="VARCHAR" />
+        <result column="customer_name" property="name" jdbcType="VARCHAR" />
+    </resultMap>
+
+    <resultMap id="companyResultMap" type="com.geekcattle.aijia.domain.CompanyInfo" >
+        <id column="idt_company" property="companyId" jdbcType="BIGINT" />
+        <result column="name" property="name" jdbcType="VARCHAR" />
+    </resultMap>
+
+    <resultMap id="buildingResultMap" type="com.geekcattle.aijia.domain.BuildingInfo" >
+        <id column="idt_building" property="id" jdbcType="BIGINT" />
+        <result column="name" property="name" jdbcType="VARCHAR" />
+    </resultMap>
+
+    <resultMap id="aladdinResultMap" type="com.geekcattle.aijia.domain.AladdinOrder" >
+        <id column="id" property="orderNo" jdbcType="BIGINT" />
+        <result column="user_id" property="userId" jdbcType="BIGINT" />
+        <result column="building_id" property="buildingId" jdbcType="BIGINT" />
+        <result column="company_id" property="companyId" jdbcType="BIGINT" />
+        <result column="order_status" property="orderStatus" jdbcType="BIGINT" />
+        <result column="order_type" property="orderType" jdbcType="BIGINT" />
+        <result column="create_time" property="orderTime" jdbcType="TIMESTAMP" />
+    </resultMap>
+
+    <resultMap id="transationResultMap" type="com.geekcattle.aijia.domain.TransactionBill" >
+        <id column="pay_source" property="paySource" jdbcType="BIGINT" />
+        <result column="transaction_type" property="transactionType" jdbcType="BIGINT" />
+        <result column="payment_type" property="paymentType" jdbcType="BIGINT" />
+        <result column="pay_type" property="payType" jdbcType="BIGINT" />
+        <result column="transaction_amount" property="transactionAmount" jdbcType="DECIMAL" />
+        <result column="pay_no" property="payNo" jdbcType="VARCHAR" />
+        <result column="amount_status" property="amountStatus" jdbcType="BIGINT" />
+        <result column="has_grant_ajb" property="hasGrantAjb" jdbcType="VARCHAR" />
+    </resultMap>
+
+    <resultMap id="omsResultMap" type="com.geekcattle.aijia.domain.OmsOrderInfo" >
+        <id column="name" property="productName" jdbcType="BIGINT" />
+        <result column="product_count" property="count" jdbcType="BIGINT" />
+        <result column="total_price" property="totalPrice" jdbcType="BIGINT" />
+        <result column="order_num" property="omsOrderNo" jdbcType="BIGINT" />
+        <result column="create_time" property="orderTime" jdbcType="DECIMAL" />
+        <result column="status" property="orderStatus" jdbcType="VARCHAR" />
+    </resultMap>
+
+    <resultMap id="activity1219ResultMap" type="com.geekcattle.aijia.domain.Activity1219Info" >
+        <id column="total_amount" property="totalAjbAmount" jdbcType="DECIMAL" />
+        <result column="join_day_count" property="joinDayCount" jdbcType="BIGINT" />
+        <result column="begin_time" property="beginTime" jdbcType="VARCHAR" />
+        <result column="end_time" property="endTime" jdbcType="VARCHAR" />
+    </resultMap>
+
+    <select id="selectTestOne" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+        select * from account_base where id = #{id}
+    </select>
+
+    <select id="selectHasAjbUserInfo" resultMap="userResultMap">
+        SELECT
+	utu.id,
+	utu.mobile,
+aotcbi.customer_name
+
+FROM
+	users.t_user utu left join aladdin_order.t_customer_base_info aotcbi
+on utu.id = aotcbi.user_id
+WHERE
+	utu.id IN (
+		SELECT DISTINCT
+			(user_id)
+		FROM
+			account.account_base
+		WHERE
+			del_flag = 0
+		AND account_type = 2
+	)
+    </select>
+
+
+    <select id="queryAladdinOrderByUserId" parameterType="java.lang.Integer" resultMap="aladdinResultMap">
+      select id,building_id,company_id,order_status,order_type,create_time from aladdin_order.t_aladdin_master_order where user_id = #{userId} and del_flag = 0
+    </select>
+
+    <select id="queryAllCompanyInfo" resultMap="companyResultMap">
+        select idt_company,name from cms.t_company
+    </select>
+
+
+    <select id="queryAllBuildingInfo" resultMap="buildingResultMap">
+        select idt_building,name from new_aijia.t_building where del_flag = 0
+    </select>
+
+    <select id="queryRealReceivablesAmount" resultType="java.math.BigDecimal" parameterType="java.lang.Integer">
+        select sum(confirmed_amount-refunded_amount) as yingShouAmount from aladdin_order.t_aladdin_master_order m left join aladdin_order.t_customer_building_account c
+          on m.id  = c.order_num and m.del_flag = 0 and c.del_flag =0 and m.user_id= #{userId}
+    </select>
+
+    <select id="queryAladdinOrderBill" parameterType="java.lang.Integer" resultMap="transationResultMap">
+        select pay_source,transaction_type,payment_type,pay_type,transaction_amount,pay_no,amount_status,has_grant_ajb from aladdin_order.t_customer_transaction_bill where order_num = #{orderNo}
+    </select>
+    
+    <select id="queryOmsOrderByUserId" parameterType="java.lang.Integer" resultMap="omsResultMap">
+
+        SELECT
+            oto.order_num,
+            oto.fid_user,
+            oto.customer_tel,
+            oto.total_price,
+            oto.product_count,
+            oto.create_time,
+            oto.state,
+            natap.name
+        FROM
+            oms.t_order oto
+        LEFT JOIN oms.t_order_detail otod ON oto.order_id = otod.fid_order
+        LEFT JOIN new_aijia.t_art_product natap on natap.idt_art_product = otod.fid_product
+        WHERE
+            oto.fid_user = #{userId}
+    </select>
+
+    <select id="query1219ActivityInfo" parameterType="java.lang.Integer" resultMap="activity1219ResultMap">
+        SELECT
+            count(*) AS join_day_count,
+            sum(amount) AS total_amount,
+            date_format(min(add_time), '%Y-%c-%d') AS begin_time,
+            date_format(max(add_time), '%Y-%c-%d') AS end_time
+        FROM
+            account.ajb_account_transaction
+        WHERE
+            event_code = 18
+        AND user_id = #{userId}
+    </select>
+
+    <select id="consumerAjbAmount" resultType="java.math.BigDecimal" parameterType="java.lang.Integer">
+        SELECT
+         sum(otoa.attr_value) *100
+ FROM oms.t_order oto
+ JOIN oms.t_order_attrvalue otoa ON oto.order_id=otoa.fid_order AND otoa.fidt_order_attr='44'
+ WHERE 1=1
+		AND oto.order_type in (5,6)
+		AND coalesce(oto.customer_tel,'') NOT LIKE '%188888%'
+		AND coalesce(oto.customer_tel,'') NOT LIKE '%177777%'
+		AND oto.state IN (2, 5, 10)  and oto.fid_user = #{userId}
+
+    </select>
+
+    <select id="queryBalanceAccountByUserId" resultType="java.math.BigDecimal" parameterType="java.lang.Integer">
+        select sum(balance_amount) from account_amount where account_id in (select id from account.account_base where user_id = #{userId} and account_type =2)
+
+    </select>
+
+
+</mapper>

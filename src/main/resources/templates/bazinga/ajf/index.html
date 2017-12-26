@@ -1,0 +1,81 @@
+<!DOCTYPE HTML>
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org">
+<head th:include="console/header">
+</head>
+<body>
+<section class="content-header">
+    <h1>底层资源管理</h1>
+    <small>艾积分管理</small>
+</section>
+<section class="content table-content">
+    <table id="dataGrid"></table>
+</section>
+<div id="toolbar">
+</div>
+<div th:include="console/footer"></div>
+</body>
+<script type="text/javascript">
+    $table = $("#dataGrid");
+    $(function () {
+        initDataGrid();
+    });
+    function initDataGrid(){
+        $table.bootstrapTable({
+            height : tableModel.getHeight(),
+            idField : "uid",
+            columns : [[
+                {title: "用户名", align: 'center',field: "username" },
+                {title: "手机号码", align: 'center',field: "mobile"},
+                {title: "aladdin订单",align: 'center', field: "aladdinOrderIds"},
+                {title: "缴纳总额(RMB)", align: 'center',field: "chargeRMBTotalAmount", sortable: true},
+                {title: "艾积分余额", align: 'center',field: "ajfBalanceAmount", sortable: true},
+                {title: "消费艾积分总额", align: 'center',field: "artConsumerAmount", sortable: true},
+                {title: "1219活动充值总额", align: 'center',field: "activity1219Amount", align: 'center'},
+                {title: "平衡性检查", align: 'center',field: "state",formatter : getState},
+                {title: "操作", field: "operate", align: 'center', events: operateEvents, formatter: operateFormatter}
+            ]],
+            url : '/bazinga/ajf/list',
+            queryParams: function(params){
+                return params;
+            },
+            responseHandler : function (res) {
+                return {
+                    rows : res.result.pageInfo.list,
+                    total : res.result.pageInfo.total
+                }
+            },
+            search : true,
+            searchOnEnterKey : true,
+            pagination : true,
+            sidePagination : 'server',
+            pageSize: 10,
+            pageList : [10, 40, 50, 100],
+            toolbar : "#toolbar",
+            showRefresh : true,
+            showToggle : true
+        });
+    }
+
+    function operateFormatter(value, row, index) {
+        return [
+            '<a href="/bazinga/ajf/detail/'+row.userId+'" >',
+            '<i class="glyphicon glyphicon-edit"></i>查看详细',
+            '</a>  ',
+            '<a class="remove" href="javascript:void(0);">',
+            '<i class="glyphicon glyphicon-refresh"></i>刷新',
+            '</a>'
+        ].join('');
+    }
+
+    function getState(value, row, index) {
+        return value==1 ? "正常" : "异常";
+    }
+
+    window.operateEvents = {
+        'click .remove': function (e, value, row, index) {
+            operaModel.delRow(row.uid, '/console/admin/delete', 'uid');
+        }
+    };
+</script>
+</html>
