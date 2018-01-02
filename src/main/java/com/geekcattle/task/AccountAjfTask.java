@@ -87,6 +87,7 @@ public class AccountAjfTask extends AbstractBaseTask implements InitializingBean
 
                 try{
                     AjbComputeUnit ajbComputeUnit = new AjbComputeUnit(userInfo,this);
+//                    ajbComputeUnit.run();
                     executor.submit(ajbComputeUnit);
                 }catch (Exception e){
                     //igore

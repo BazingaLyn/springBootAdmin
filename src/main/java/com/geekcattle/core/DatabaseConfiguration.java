@@ -1,7 +1,5 @@
-package com.geekcattle.config.utils;
+package com.geekcattle.core;
 
-import com.jcraft.jsch.JSch;
-import com.jcraft.jsch.Session;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.mybatis.spring.SqlSessionFactoryBean;
 import org.mybatis.spring.SqlSessionTemplate;
@@ -9,8 +7,7 @@ import org.mybatis.spring.annotation.MapperScan;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.boot.autoconfigure.jdbc.DataSourceBuilder;
-import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
@@ -24,27 +21,27 @@ import javax.sql.DataSource;
  * @desc
  */
 @Configuration
-@MapperScan(basePackages = "com.geekcattle.aijia.mapper", sqlSessionTemplateRef  = "sqlSessionTemplate")
+@MapperScan(basePackages = "com.geekcattle.aijia.mapper", sqlSessionTemplateRef  = "accountSqlSessionTemplate")
 public class DatabaseConfiguration {
 
     private final Logger logger = LoggerFactory.getLogger(DatabaseConfiguration.class);
 
 
-    @Bean(name = "sqlSessionFactory")
-    public SqlSessionFactory testSqlSessionFactory(@Qualifier("dataSource") DataSource dataSource) throws Exception {
+    @Bean(name = "accountSqlSessionFactory")
+    public SqlSessionFactory testSqlSessionFactory(@Qualifier("account.dataSource") DataSource dataSource) throws Exception {
         SqlSessionFactoryBean bean = new SqlSessionFactoryBean();
         bean.setDataSource(dataSource);
-        bean.setMapperLocations(new PathMatchingResourcePatternResolver().getResources("classpath:aijia/mapper/*.xml"));
+        bean.setMapperLocations(new PathMatchingResourcePatternResolver().getResources("classpath:aijiamapper/*.xml"));
         return bean.getObject();
     }
 
-    @Bean(name = "transactionManager")
-    public DataSourceTransactionManager testTransactionManager(@Qualifier("dataSource") DataSource dataSource) {
+    @Bean(name = "accountTransactionManager")
+    public DataSourceTransactionManager testTransactionManager(@Qualifier("account.dataSource") DataSource dataSource) {
         return new DataSourceTransactionManager(dataSource);
     }
 
-    @Bean(name = "sqlSessionTemplate")
-    public SqlSessionTemplate testSqlSessionTemplate(@Qualifier("sqlSessionFactory") SqlSessionFactory sqlSessionFactory) throws Exception {
+    @Bean(name = "accountSqlSessionTemplate")
+    public SqlSessionTemplate testSqlSessionTemplate(@Qualifier("accountSqlSessionFactory") SqlSessionFactory sqlSessionFactory) throws Exception {
         return new SqlSessionTemplate(sqlSessionFactory);
     }
 

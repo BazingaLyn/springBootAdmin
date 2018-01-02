@@ -4,8 +4,12 @@ import com.alibaba.fastjson.JSON;
 import com.geekcattle.config.utils.FileToJsonStrUtils;
 import com.geekcattle.config.utils.Page;
 import com.geekcattle.elasticsearch.support.api.ElasticSearchApi;
+import com.geekcattle.elasticsearch.support.api.ElasticSearchIndexManagerApi;
 import com.geekcattle.elasticsearch.support.conf.ElasticSearchConfig;
 import com.google.common.base.Strings;
+import org.elasticsearch.action.admin.indices.create.CreateIndexResponse;
+import org.elasticsearch.action.admin.indices.delete.DeleteIndexResponse;
+import org.elasticsearch.action.admin.indices.exists.indices.IndicesExistsResponse;
 import org.elasticsearch.action.bulk.BulkRequestBuilder;
 import org.elasticsearch.action.bulk.BulkResponse;
 import org.elasticsearch.action.delete.DeleteResponse;
@@ -21,10 +25,12 @@ import org.elasticsearch.action.search.SearchType;
 import org.elasticsearch.action.update.UpdateRequest;
 import org.elasticsearch.action.update.UpdateResponse;
 import org.elasticsearch.client.Client;
+import org.elasticsearch.client.IndicesAdminClient;
 import org.elasticsearch.client.transport.TransportClient;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.common.transport.TransportAddress;
 import org.elasticsearch.common.xcontent.XContentFactory;
+import org.elasticsearch.common.xcontent.XContentType;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.index.reindex.BulkByScrollResponse;
 import org.elasticsearch.index.reindex.DeleteByQueryAction;
@@ -47,7 +53,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class ElasticSearchApiImpl<T> implements ElasticSearchApi<T>,ElasticSearchConfig {
+public class ElasticSearchApiImpl<T> implements ElasticSearchApi<T>,ElasticSearchIndexManagerApi,ElasticSearchConfig {
 
     private final static Logger logger = LoggerFactory.getLogger(ElasticSearchApiImpl.class);
 	
@@ -55,6 +61,7 @@ public class ElasticSearchApiImpl<T> implements ElasticSearchApi<T>,ElasticSearc
 	private String index;
 	private String type;
 	private Client client;
+	private IndicesAdminClient indicesAdminClient;
 
 	public ElasticSearchApiImpl(String host, Integer port, String clusterName) {
 		if (null == client) {
@@ -65,6 +72,8 @@ public class ElasticSearchApiImpl<T> implements ElasticSearchApi<T>,ElasticSearc
 			try {
 				client = new PreBuiltTransportClient(settings).addTransportAddress(
 						new TransportAddress(InetAddress.getByName(host), port));
+
+				indicesAdminClient = client.admin().indices();
 			} catch (UnknownHostException e) {
 			}
 		}
@@ -115,7 +124,7 @@ public class ElasticSearchApiImpl<T> implements ElasticSearchApi<T>,ElasticSearc
 
 	public Integer indexWithId(T t,String id){
 		if(null != index && null != type){
-			IndexResponse indexResponse = client.prepareIndex(index, type,id).setSource(JSON.toJSONString(t)).get();
+			IndexResponse indexResponse = client.prepareIndex(index, type,id).setSource(JSON.toJSONString(t), XContentType.JSON).get();
 			if(indexResponse.getId() != null){
 				return 1;
 			}
@@ -294,6 +303,44 @@ public class ElasticSearchApiImpl<T> implements ElasticSearchApi<T>,ElasticSearc
 			}
 		}
 		return new Page<>();
+	}
+
+	@Override
+	public boolean createIndex(String indexName, Integer shardsNum, Integer replicas) {
+
+		if(!existIndex(indexName)){
+
+			CreateIndexResponse cResponse = indicesAdminClient.prepareCreate(indexName).setSettings(Settings.builder()
+					.put("index.number_of_shards",shardsNum)
+					.put("index.number_of_replicas",replicas)).get();
+
+			return cResponse.isShardsAcked();
+		}
+
+		return false;
+
+	}
+
+	@Override
+	public boolean existIndex(String indexName) {
+
+		IndicesExistsResponse existsResponse = indicesAdminClient.prepareExists(indexName).get();
+		return existsResponse.isExists();
+	}
+
+	@Override
+	public boolean deleteIndex(String indexName) {
+
+		DeleteIndexResponse dResponse = indicesAdminClient.prepareDelete(indexName).get();
+
+		return dResponse.isAcknowledged();
+	}
+
+	@Override
+	public void setMappingInfo(String index, String type, String mappingJsonStr) {
+
+		indicesAdminClient.preparePutMapping(index).setType(type).setSource(mappingJsonStr);
+
 	}
 
 	//	public void scroll() {

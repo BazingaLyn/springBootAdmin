@@ -15,7 +15,7 @@ import javax.annotation.Resource;
  * @create 2017-12-26 14:58
  **/
 @RestController
-public class TestController {
+public class LynccController {
 
     @Resource
     private AccountAjfTask accountAjfTask;
