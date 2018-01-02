@@ -53,7 +53,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class ElasticSearchApiImpl<T> implements ElasticSearchApi<T>,ElasticSearchIndexManagerApi,ElasticSearchConfig {
+public class ElasticSearchApiImpl<T> implements ElasticSearchApi<T>,ElasticSearchConfig {
 
     private final static Logger logger = LoggerFactory.getLogger(ElasticSearchApiImpl.class);
 	
@@ -305,43 +305,6 @@ public class ElasticSearchApiImpl<T> implements ElasticSearchApi<T>,ElasticSearc
 		return new Page<>();
 	}
 
-	@Override
-	public boolean createIndex(String indexName, Integer shardsNum, Integer replicas) {
-
-		if(!existIndex(indexName)){
-
-			CreateIndexResponse cResponse = indicesAdminClient.prepareCreate(indexName).setSettings(Settings.builder()
-					.put("index.number_of_shards",shardsNum)
-					.put("index.number_of_replicas",replicas)).get();
-
-			return cResponse.isShardsAcked();
-		}
-
-		return false;
-
-	}
-
-	@Override
-	public boolean existIndex(String indexName) {
-
-		IndicesExistsResponse existsResponse = indicesAdminClient.prepareExists(indexName).get();
-		return existsResponse.isExists();
-	}
-
-	@Override
-	public boolean deleteIndex(String indexName) {
-
-		DeleteIndexResponse dResponse = indicesAdminClient.prepareDelete(indexName).get();
-
-		return dResponse.isAcknowledged();
-	}
-
-	@Override
-	public void setMappingInfo(String index, String type, String mappingJsonStr) {
-
-		indicesAdminClient.preparePutMapping(index).setType(type).setSource(mappingJsonStr);
-
-	}
 
 	//	public void scroll() {
 //		QueryBuilder qb = matchAllQuery();
