@@ -77,6 +77,8 @@ public class AccountAjfTask extends AbstractBaseTask implements InitializingBean
     @Override
     public void compute() {
 
+        prepare();
+
         List<UserInfo> userInfos = accountInfoMapper.selectHasAjbUserInfo();
 
         if(null != userInfos && !CollectionUtils.isEmpty(userInfos)){
@@ -87,6 +89,7 @@ public class AccountAjfTask extends AbstractBaseTask implements InitializingBean
 
                 try{
                     AjbComputeUnit ajbComputeUnit = new AjbComputeUnit(userInfo,this);
+//                    单线程测试
 //                    ajbComputeUnit.run();
                     executor.submit(ajbComputeUnit);
                 }catch (Exception e){

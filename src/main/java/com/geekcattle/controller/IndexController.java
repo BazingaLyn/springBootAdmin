@@ -4,6 +4,7 @@
 
 package com.geekcattle.controller;
 
+import com.geekcattle.task.AccountAjfTask;
 import com.geekcattle.util.DateUtil;
 import org.apache.shiro.cache.Cache;
 import org.slf4j.Logger;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import java.util.Collection;
 import java.util.concurrent.ConcurrentHashMap;
@@ -24,6 +26,7 @@ import java.util.concurrent.ConcurrentMap;
 public class IndexController {
 
     private Logger logger = LoggerFactory.getLogger(this.getClass());
+
 
 
     @RequestMapping
@@ -38,14 +41,14 @@ public class IndexController {
         logger.warn("This is a warn message");
         logger.error("This is an error message");
 
-
-
-
         String rq = DateUtil.getCurrentTime();
         System.out.println(rq);
         model.addAttribute("rq", rq);
         return "test/test";
     }
+
+
+
 
     @ResponseBody
     @RequestMapping(value = "/testPost",method = {RequestMethod.POST})

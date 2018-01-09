@@ -1,7 +1,9 @@
 package com.geekcattle.elasticsearch.support.api;
 
 
-import com.geekcattle.config.utils.Page;
+import com.geekcattle.aijia.domain.AccountAjfInfo;
+import com.geekcattle.model.vo.SuggestResult;
+import com.github.pagehelper.PageInfo;
 
 import java.util.List;
 import java.util.Map;
@@ -34,5 +36,7 @@ public interface ElasticSearchApi<T> {
 
 	String searchSuggester(String scriptLocation, String key);
 
-	public Page<T> page(int from, int pageSize, Class<T> clz);
+	public PageInfo<T> page(int from, int pageSize, Class<T> clz);
+
+    List<SuggestResult> suggestList(String keyword);
 }

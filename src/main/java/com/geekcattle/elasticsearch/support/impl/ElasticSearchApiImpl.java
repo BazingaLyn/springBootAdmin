@@ -1,15 +1,15 @@
 package com.geekcattle.elasticsearch.support.impl;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
+import com.geekcattle.aijia.domain.AccountAjfInfo;
 import com.geekcattle.config.utils.FileToJsonStrUtils;
-import com.geekcattle.config.utils.Page;
 import com.geekcattle.elasticsearch.support.api.ElasticSearchApi;
-import com.geekcattle.elasticsearch.support.api.ElasticSearchIndexManagerApi;
 import com.geekcattle.elasticsearch.support.conf.ElasticSearchConfig;
+import com.geekcattle.model.vo.SuggestResult;
+import com.github.pagehelper.PageInfo;
 import com.google.common.base.Strings;
-import org.elasticsearch.action.admin.indices.create.CreateIndexResponse;
-import org.elasticsearch.action.admin.indices.delete.DeleteIndexResponse;
-import org.elasticsearch.action.admin.indices.exists.indices.IndicesExistsResponse;
 import org.elasticsearch.action.bulk.BulkRequestBuilder;
 import org.elasticsearch.action.bulk.BulkResponse;
 import org.elasticsearch.action.delete.DeleteResponse;
@@ -26,7 +26,6 @@ import org.elasticsearch.action.update.UpdateRequest;
 import org.elasticsearch.action.update.UpdateResponse;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.client.IndicesAdminClient;
-import org.elasticsearch.client.transport.TransportClient;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.common.transport.TransportAddress;
 import org.elasticsearch.common.xcontent.XContentFactory;
@@ -269,9 +268,9 @@ public class ElasticSearchApiImpl<T> implements ElasticSearchApi<T>,ElasticSearc
 	}
 
 	@Override
-	public Page<T> page(int pageNo, int pageSize, Class<T> clz) {
+	public PageInfo<T> page(int from, int pageSize, Class<T> clz) {
 
-		Page<T> page = new Page<>();
+		PageInfo<T> page = new PageInfo<>();
 
 		List<T> result = new ArrayList<>();
 
@@ -284,27 +283,73 @@ public class ElasticSearchApiImpl<T> implements ElasticSearchApi<T>,ElasticSearc
 						.setTypes(type)
 						.setSearchType(SearchType.DFS_QUERY_THEN_FETCH)
 						.setQuery(QueryBuilders.matchAllQuery())                 // Query
-						.setFrom((pageNo-1) * pageSize).setSize(pageSize).setExplain(true)
+						.setFrom(from).setSize(pageSize).setExplain(true)
 						.get();
 				if(null != response){
 
 					SearchHits searchHits = response.getHits();
 					SearchHit[] hits = searchHits.getHits();
-					for (int i = 0;i < hits.length;i++){
+ 					for (int i = 0;i < hits.length;i++){
 						T t = JSON.parseObject(hits[i].getSourceAsString(),clz);
 						result.add(t);
 					}
-					page.setRoot(result);
-					page.setTotal((int)totalCount);
-					page.setCurrentPage(pageNo);
-					page.setLimit(pageSize);
+					page.setList(result);
+					page.setTotal(totalCount);
+					page.setPages(from / pageSize +(from % pageSize == 0 ? 0 : 1));
+					page.setPageSize(pageSize);
 					return page;
 				}
 			}
 		}
-		return new Page<>();
+		return new PageInfo<>();
 	}
 
+	@Override
+	public List<SuggestResult> suggestList(String keyword) {
+
+		List<SuggestResult> suggestResults = null;
+
+		String searchResult = searchSuggester("account_ajf_suggester.json",keyword);
+
+		if(!Strings.isNullOrEmpty(searchResult)){
+
+			suggestResults =new ArrayList<>();
+
+			JSONObject jsonObj = JSON.parseObject(searchResult);
+			JSONObject childrenJson = jsonObj.getJSONObject("hits");
+			JSONArray jsonArray = childrenJson.getJSONArray("hits");
+
+			for(int i = 0;i < jsonArray.size();i++){
+
+				SuggestResult suggestResult = new SuggestResult();
+				JSONObject value = jsonArray.getJSONObject(i).getJSONObject("_source");
+				Integer userId = value.getInteger("userId");
+				String userName = value.getString("userName");
+				Integer state = value.getInteger("state");
+				String stateDesc = null;
+
+				switch (state){
+					case 1 :
+						stateDesc = "健康";
+						break;
+					case 2 :
+						stateDesc = "亚健康";
+						break;
+					case 3 :
+						stateDesc = "不健康";
+						break;
+				}
+
+				suggestResult.setKeyword(userId);
+				suggestResult.setMainSuggestKeyword(userName);
+				suggestResult.setExtSuggestKeyword(stateDesc);
+
+				suggestResults.add(suggestResult);
+			}
+		}
+
+		return suggestResults;
+	}
 
 	//	public void scroll() {
 //		QueryBuilder qb = matchAllQuery();

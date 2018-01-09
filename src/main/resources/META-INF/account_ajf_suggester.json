@@ -1,0 +1,48 @@
+{
+  "query": {
+    "dis_max": {
+      "queries": [
+        {
+          "match_phrase": {
+            "userName.userName_first_py": {
+              "query": "{{key}}"
+            }
+          }
+        },
+        {
+          "match_phrase": {
+            "userName.userName_pinyin": {
+              "query": "{{key}}",
+              "boost": 2
+            }
+          }
+        },
+        {
+          "match_phrase": {
+            "aladdinOrderInfoList.orderId": {
+              "query": "{{key}}",
+              "boost": 5
+            }
+          }
+        },
+        {
+          "match_phrase": {
+            "userId.userId_ed": {
+              "query": "{{key}}",
+              "boost": 5
+            }
+          }
+        },
+        {
+          "match_phrase": {
+            "mobile.mobile_ed": {
+              "query": "{{key}}",
+              "boost": 5
+            }
+          }
+        }
+      ],
+      "tie_breaker": 1
+    }
+  }
+}

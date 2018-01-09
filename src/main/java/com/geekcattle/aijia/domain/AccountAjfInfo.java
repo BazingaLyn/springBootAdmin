@@ -29,6 +29,15 @@ public class AccountAjfInfo {
 
     private BigDecimal consumerAjbAmount;
 
+    private BigDecimal totalChargeRmbAmount;
+
+    private BigDecimal totalRecoveryAjfAmount;
+
+    // 1 健康 2 亚健康 3 不健康
+    private Integer state;
+    // 差值额度
+    private BigDecimal differenceValue;
+
     private Date indexTime;
 
     public Date getIndexTime() {
@@ -111,6 +120,94 @@ public class AccountAjfInfo {
         this.consumerAjbAmount = consumerAjbAmount;
     }
 
+    public BigDecimal getTotalChargeRmbAmount() {
+        return totalChargeRmbAmount;
+    }
+
+    public void setTotalChargeRmbAmount(BigDecimal totalChargeRmbAmount) {
+        this.totalChargeRmbAmount = totalChargeRmbAmount;
+    }
+
+    public Integer getState() {
+        return state;
+    }
+
+    public void setState(Integer state) {
+        this.state = state;
+    }
+
+    public BigDecimal getDifferenceValue() {
+        return differenceValue;
+    }
+
+    public BigDecimal getTotalRecoveryAjfAmount() {
+        return totalRecoveryAjfAmount;
+    }
+
+    public void setTotalRecoveryAjfAmount(BigDecimal totalRecoveryAjfAmount) {
+        this.totalRecoveryAjfAmount = totalRecoveryAjfAmount;
+    }
+
+    public void setDifferenceValue(BigDecimal differenceValue) {
+        this.differenceValue = differenceValue;
+    }
+
+
+    public void setBalanceState() {
+
+        // 充值RMB余额
+        BigDecimal balanceChargeRMBAmount = this.totalChargeRmbAmount == null ? BigDecimal.ZERO : this.totalChargeRmbAmount;
+
+        // 当前余额
+        BigDecimal currentAjfBalanceAmount = this.totalBalanceAmount == null ? BigDecimal.ZERO : this.totalBalanceAmount;
+
+        // 1219活动余额
+        BigDecimal activity1219Amount = this.activity1219Info.getTotalAjbAmount() == null ? BigDecimal.ZERO : this.activity1219Info.getTotalAjbAmount();
+
+        // 艺术品订单消费ajf
+        BigDecimal ajfOrderConsumerAmount = this.consumerAjbAmount == null ? BigDecimal.ZERO : this.consumerAjbAmount;
+
+        // 回收的AJF
+        BigDecimal recoveryAmount = this.totalRecoveryAjfAmount == null ? BigDecimal.ZERO : this.totalRecoveryAjfAmount;
+
+
+        BigDecimal differenceAmount = balanceChargeRMBAmount.multiply(new BigDecimal("3")).add(activity1219Amount).subtract(currentAjfBalanceAmount).subtract(ajfOrderConsumerAmount).subtract(recoveryAmount);
+
+        this.differenceValue = differenceAmount;
+
+        if(differenceAmount.abs().intValue() < 50){
+            this.state = StateEnum.HEALTH.getCode();
+        }
+
+        if(differenceAmount.abs().intValue() <= 3000){
+            this.state = StateEnum.SUBHEALTH.getCode();
+        }
+
+        if (differenceAmount.abs().intValue() > 3000){
+            this.state = StateEnum.UNHEALTH.getCode();
+        }
+
+    }
+
+
+    public enum StateEnum {
+
+        HEALTH(1),SUBHEALTH(2),UNHEALTH(3);
+
+        private Integer code;
+
+        StateEnum(Integer code) {
+            this.code = code;
+        }
+
+        public Integer getCode() {
+            return code;
+        }
+
+        public void setCode(Integer code) {
+            this.code = code;
+        }
+    }
 
     public static class AladdinOrderInfo {
 
@@ -123,8 +220,6 @@ public class AccountAjfInfo {
         private Integer belongCompanyId;
 
         private String belongCompanyName;
-
-        private BigDecimal totalCashAmount;
 
         private List<TransactionBill> transactionBills;
 
@@ -166,14 +261,6 @@ public class AccountAjfInfo {
 
         public void setBelongCompanyName(String belongCompanyName) {
             this.belongCompanyName = belongCompanyName;
-        }
-
-        public BigDecimal getTotalCashAmount() {
-            return totalCashAmount;
-        }
-
-        public void setTotalCashAmount(BigDecimal totalCashAmount) {
-            this.totalCashAmount = totalCashAmount;
         }
 
         public List<TransactionBill> getTransactionBills() {

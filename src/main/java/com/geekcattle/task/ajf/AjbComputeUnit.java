@@ -54,6 +54,15 @@ public class AjbComputeUnit implements Runnable {
 
             accountAjfInfo.setTotalBalanceAmount(balanceAccount);
 
+            BigDecimal realCashAmount = accountAjfTask.getAccountInfoMapper().queryRealReceivablesAmount(userId);
+            accountAjfInfo.setTotalChargeRmbAmount(realCashAmount);
+
+            Date ajfEndTime = accountAjfTask.getAccountInfoMapper().queryLastEndTime(userId);
+            accountAjfInfo.setEndDate(ajfEndTime);
+
+            BigDecimal recoveryAjfAmount = accountAjfTask.getAccountInfoMapper().queryRecoveryAjfAmount(userId);
+            accountAjfInfo.setTotalRecoveryAjfAmount(recoveryAjfAmount);
+
             //aladdin 订单的信息
             List<AladdinOrder> aladdinOrders = accountAjfTask.getAccountInfoMapper().queryAladdinOrderByUserId(userId);
 
@@ -74,10 +83,6 @@ public class AjbComputeUnit implements Runnable {
                     if(accountAjfTask.getCompanyInfosMaps() != null){
                         aladdinOrderInfo.setBelongCompanyName(accountAjfTask.getCompanyInfosMaps().get(aladdinOrderInfo.getBelongCompanyId()));
                     }
-
-                    BigDecimal realCashAmount = accountAjfTask.getAccountInfoMapper().queryRealReceivablesAmount(userId);
-                    aladdinOrderInfo.setTotalCashAmount(realCashAmount);
-
                     List<TransactionBill> transactionBills = accountAjfTask.getAccountInfoMapper().queryAladdinOrderBill(aladdinOrder.getOrderNo());
 
                     if(!CollectionUtils.isEmpty(transactionBills)){
@@ -109,6 +114,10 @@ public class AjbComputeUnit implements Runnable {
             accountAjfInfo.setConsumerAjbAmount(consumerAjbAmount);
 
             accountAjfInfo.setIndexTime(new Date());
+
+
+            accountAjfInfo.setBalanceState();
+
 
             logger.info("accountAjbInfo is {}", JSON.toJSONString(accountAjfInfo));
 

@@ -4,6 +4,7 @@ import com.geekcattle.aijia.domain.*;
 import org.springframework.stereotype.Repository;
 
 import java.math.BigDecimal;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -81,4 +82,18 @@ public interface AccountInfoMapper {
      * @return
      */
     BigDecimal queryBalanceAccountByUserId(Integer userId);
+
+    /**
+     *
+     * @param userId
+     * @return
+     */
+    Date queryLastEndTime(Integer userId);
+
+    /**
+     *
+     * @param userId
+     * @return
+     */
+    BigDecimal queryRecoveryAjfAmount(Integer userId);
 }

@@ -1,11 +1,13 @@
 package com.geekcattle.elasticsearch.support.impl;
 
 import com.geekcattle.elasticsearch.support.api.ElasticSearchIndexManagerApi;
+import org.elasticsearch.action.ActionResponse;
 import org.elasticsearch.action.admin.indices.create.CreateIndexResponse;
 import org.elasticsearch.action.admin.indices.delete.DeleteIndexResponse;
 import org.elasticsearch.action.admin.indices.exists.indices.IndicesExistsResponse;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.client.IndicesAdminClient;
+import org.elasticsearch.client.Response;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.common.transport.TransportAddress;
 import org.elasticsearch.transport.client.PreBuiltTransportClient;
@@ -64,6 +66,14 @@ public class ElasticSearchIndexManagerApiImpl implements ElasticSearchIndexManag
     public void setMappingInfo(String index, String type, String mappingJsonStr) {
 
         indicesAdminClient.preparePutMapping(index).setType(type).setSource(mappingJsonStr);
+
+    }
+
+    @Override
+    public Boolean deleteById(String index, String type,String id) {
+
+        DeleteIndexResponse deleteReponse = indicesAdminClient.prepareDelete(index,type,id).get();
+        return deleteReponse.isAcknowledged();
 
     }
 

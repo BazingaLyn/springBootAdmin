@@ -42,7 +42,11 @@ public interface ElasticSearchIndexManagerApi {
     void setMappingInfo(String index,String type,String mappingJsonStr);
 
 
-
-
-
+    /**
+     *
+     * @param index
+     * @param type
+     * @return
+     */
+    Boolean deleteById(String index, String type,String id);
 }

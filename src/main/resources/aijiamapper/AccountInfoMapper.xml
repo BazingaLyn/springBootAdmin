@@ -50,7 +50,7 @@
         <result column="total_price" property="totalPrice" jdbcType="BIGINT" />
         <result column="order_num" property="omsOrderNo" jdbcType="BIGINT" />
         <result column="create_time" property="orderTime" jdbcType="DECIMAL" />
-        <result column="status" property="orderStatus" jdbcType="VARCHAR" />
+        <result column="state" property="orderStatus" jdbcType="BIGINT" />
     </resultMap>
 
     <resultMap id="activity1219ResultMap" type="com.geekcattle.aijia.domain.Activity1219Info" >
@@ -124,7 +124,7 @@ WHERE
         LEFT JOIN oms.t_order_detail otod ON oto.order_id = otod.fid_order
         LEFT JOIN new_aijia.t_art_product natap on natap.idt_art_product = otod.fid_product
         WHERE
-            oto.fid_user = #{userId}
+            oto.fid_user = #{userId} GROUP BY oto.order_num
     </select>
 
     <select id="query1219ActivityInfo" parameterType="java.lang.Integer" resultMap="activity1219ResultMap">
@@ -142,20 +142,26 @@ WHERE
 
     <select id="consumerAjbAmount" resultType="java.math.BigDecimal" parameterType="java.lang.Integer">
         SELECT
-         sum(otoa.attr_value) *100
- FROM oms.t_order oto
- JOIN oms.t_order_attrvalue otoa ON oto.order_id=otoa.fid_order AND otoa.fidt_order_attr='44'
- WHERE 1=1
-		AND oto.order_type in (5,6)
-		AND coalesce(oto.customer_tel,'') NOT LIKE '%188888%'
-		AND coalesce(oto.customer_tel,'') NOT LIKE '%177777%'
-		AND oto.state IN (2, 5, 10)  and oto.fid_user = #{userId}
-
+            sum(otoa.attr_value) *100
+         FROM oms.t_order oto
+         JOIN oms.t_order_attrvalue otoa ON oto.order_id=otoa.fid_order AND otoa.fidt_order_attr='44'
+         WHERE 1=1
+            AND oto.order_type in (5,6)
+            AND coalesce(oto.customer_tel,'') NOT LIKE '%188888%'
+            AND coalesce(oto.customer_tel,'') NOT LIKE '%177777%'
+            AND oto.state IN (2, 5, 10)  and oto.fid_user = #{userId}
     </select>
 
     <select id="queryBalanceAccountByUserId" resultType="java.math.BigDecimal" parameterType="java.lang.Integer">
         select sum(balance_amount) from account_amount where account_id in (select id from account.account_base where user_id = #{userId} and account_type =2)
+    </select>
 
+    <select id="queryLastEndTime" resultType="java.util.Date" parameterType="java.lang.Integer">
+        select min(account_end_time) from account.account_base where user_id = #{userId} and account_type = 2
+    </select>
+
+    <select id="queryRecoveryAjfAmount" resultType="java.math.BigDecimal" parameterType="java.lang.Integer">
+        select sum(amount) from ajb_account_transaction where user_id = #{userId} and event_code = 17 and del_flag = 0
     </select>
 
 
