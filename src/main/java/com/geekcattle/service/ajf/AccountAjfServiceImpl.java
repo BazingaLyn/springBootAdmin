@@ -43,9 +43,9 @@ public class AccountAjfServiceImpl implements AccountAjfService,InitializingBean
     }
 
     @Override
-    public List<SuggestResult> suggestList(String keyword) {
+    public SuggestResult suggestList(String keyword) {
 
-        List<SuggestResult> suggestResults = elasticSearchImpl.suggestList(keyword);
+        SuggestResult suggestResults = elasticSearchImpl.suggestList(keyword);
 
         return suggestResults;
     }

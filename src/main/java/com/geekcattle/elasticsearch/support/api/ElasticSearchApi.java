@@ -38,5 +38,5 @@ public interface ElasticSearchApi<T> {
 
 	public PageInfo<T> page(int from, int pageSize, Class<T> clz);
 
-    List<SuggestResult> suggestList(String keyword);
+    SuggestResult suggestList(String keyword);
 }

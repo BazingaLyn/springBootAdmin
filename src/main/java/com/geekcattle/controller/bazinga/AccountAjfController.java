@@ -1,5 +1,6 @@
 package com.geekcattle.controller.bazinga;
 
+import com.alibaba.fastjson.JSON;
 import com.geekcattle.aijia.domain.AccountAjfInfo;
 import com.geekcattle.aijia.domain.Activity1219Info;
 import com.geekcattle.model.bazinga.AijiaAjf;
@@ -65,11 +66,13 @@ public class AccountAjfController {
 
     @RequestMapping(value = "/suggestList", method = {RequestMethod.POST})
     @ResponseBody
-    public List<SuggestResult> suggestList(@RequestBody SuggestRequest suggestRequest){
+    public SuggestResult suggestList(SuggestRequest suggestRequest){
 
-        logger.info("suggestList params {}",suggestRequest.getKeyword());
+        logger.info("suggestList params {}",suggestRequest.getTopicName());
 
-        List<SuggestResult> suggestResults = accountAjfService.suggestList(suggestRequest.getKeyword());
+        SuggestResult suggestResults = accountAjfService.suggestList(suggestRequest.getTopicName());
+
+        logger.info("suggestList result {}", JSON.toJSONString(suggestResults));
 
         return suggestResults;
 

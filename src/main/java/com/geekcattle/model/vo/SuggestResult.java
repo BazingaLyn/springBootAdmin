@@ -2,6 +2,8 @@ package com.geekcattle.model.vo;
 
 import com.alibaba.fastjson.JSON;
 
+import java.util.List;
+
 /**
  * 搜索建议结果
  *
@@ -10,45 +12,58 @@ import com.alibaba.fastjson.JSON;
  **/
 public class SuggestResult {
 
-    /**
-     * 搜索核心关键字
-     */
-    private Integer keyword;
 
-    /**
-     * 核心关键字段
-     */
-    private String mainSuggestKeyword;
+    private Integer code;
 
+    private List<EachSuggestItems> data;
 
-    /**
-     * 额外的建议关键词
-     */
-    private String extSuggestKeyword;
-
-    public Integer getKeyword() {
-        return keyword;
+    public Integer getCode() {
+        return code;
     }
 
-    public void setKeyword(Integer keyword) {
-        this.keyword = keyword;
+    public void setCode(Integer code) {
+        this.code = code;
     }
 
-    public String getMainSuggestKeyword() {
-        return mainSuggestKeyword;
+    public List<EachSuggestItems> getData() {
+        return data;
     }
 
-    public void setMainSuggestKeyword(String mainSuggestKeyword) {
-        this.mainSuggestKeyword = mainSuggestKeyword;
+    public void setData(List<EachSuggestItems> data) {
+        this.data = data;
     }
 
-    public String getExtSuggestKeyword() {
-        return extSuggestKeyword;
+    public static class EachSuggestItems {
+
+        /**
+         * 搜索核心关键字
+         */
+        private Integer keyword;
+
+        /**
+         * 核心关键字段
+         */
+        private String mainSuggestKeyword;
+
+
+        public Integer getKeyword() {
+            return keyword;
+        }
+
+        public void setKeyword(Integer keyword) {
+            this.keyword = keyword;
+        }
+
+        public String getMainSuggestKeyword() {
+            return mainSuggestKeyword;
+        }
+
+        public void setMainSuggestKeyword(String mainSuggestKeyword) {
+            this.mainSuggestKeyword = mainSuggestKeyword;
+        }
     }
 
-    public void setExtSuggestKeyword(String extSuggestKeyword) {
-        this.extSuggestKeyword = extSuggestKeyword;
-    }
+
 
     @Override
     public String toString() {

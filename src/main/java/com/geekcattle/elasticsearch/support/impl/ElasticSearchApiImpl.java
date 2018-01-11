@@ -305,15 +305,17 @@ public class ElasticSearchApiImpl<T> implements ElasticSearchApi<T>,ElasticSearc
 	}
 
 	@Override
-	public List<SuggestResult> suggestList(String keyword) {
+	public SuggestResult suggestList(String keyword) {
 
-		List<SuggestResult> suggestResults = null;
+		SuggestResult suggestResults = new SuggestResult();
 
 		String searchResult = searchSuggester("account_ajf_suggester.json",keyword);
 
 		if(!Strings.isNullOrEmpty(searchResult)){
 
-			suggestResults =new ArrayList<>();
+			suggestResults.setCode(1);
+
+			List<SuggestResult.EachSuggestItems> eachSuggestItems =new ArrayList<>();
 
 			JSONObject jsonObj = JSON.parseObject(searchResult);
 			JSONObject childrenJson = jsonObj.getJSONObject("hits");
@@ -321,7 +323,7 @@ public class ElasticSearchApiImpl<T> implements ElasticSearchApi<T>,ElasticSearc
 
 			for(int i = 0;i < jsonArray.size();i++){
 
-				SuggestResult suggestResult = new SuggestResult();
+				SuggestResult.EachSuggestItems suggestItems = new SuggestResult.EachSuggestItems();
 				JSONObject value = jsonArray.getJSONObject(i).getJSONObject("_source");
 				Integer userId = value.getInteger("userId");
 				String userName = value.getString("userName");
@@ -340,12 +342,14 @@ public class ElasticSearchApiImpl<T> implements ElasticSearchApi<T>,ElasticSearc
 						break;
 				}
 
-				suggestResult.setKeyword(userId);
-				suggestResult.setMainSuggestKeyword(userName);
-				suggestResult.setExtSuggestKeyword(stateDesc);
+				suggestItems.setKeyword(userId);
+				suggestItems.setMainSuggestKeyword(userName+" "+stateDesc);
 
-				suggestResults.add(suggestResult);
+				eachSuggestItems.add(suggestItems);
 			}
+			suggestResults.setData(eachSuggestItems);
+		}else {
+			suggestResults.setCode(2);
 		}
 
 		return suggestResults;

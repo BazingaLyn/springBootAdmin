@@ -8,13 +8,13 @@ package com.geekcattle.model.vo;
  **/
 public class SuggestRequest {
 
-    private String keyword;
+    private String topicName;
 
-    public String getKeyword() {
-        return keyword;
+    public String getTopicName() {
+        return topicName;
     }
 
-    public void setKeyword(String keyword) {
-        this.keyword = keyword;
+    public void setTopicName(String topicName) {
+        this.topicName = topicName;
     }
 }

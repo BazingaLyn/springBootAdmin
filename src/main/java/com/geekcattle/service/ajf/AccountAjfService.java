@@ -16,5 +16,5 @@ public interface AccountAjfService {
 
     PageInfo<AccountAjfInfo> pageAjfInfo(String key, Integer offset, Integer limit);
 
-    List<SuggestResult> suggestList(String keyword);
+    SuggestResult suggestList(String keyword);
 }

@@ -56,15 +56,15 @@ public class BazingaLynccController {
         return accountAjfInfoPageInfo;
     }
 
-    @RequestMapping(value = "/suggestList", method = {RequestMethod.POST})
-    @ResponseBody
-    public List<SuggestResult> suggestList(@RequestBody SuggestRequest suggestRequest){
-
-        logger.info("suggestList params {}",suggestRequest.getKeyword());
-
-        List<SuggestResult> suggestResults = accountAjfService.suggestList(suggestRequest.getKeyword());
-
-        return suggestResults;
-
-    }
+//    @RequestMapping(value = "/suggestList", method = {RequestMethod.POST})
+//    @ResponseBody
+//    public List<SuggestResult> suggestList(@RequestBody SuggestRequest suggestRequest){
+//
+//        logger.info("suggestList params {}",suggestRequest.getKeyword());
+//
+//        List<SuggestResult> suggestResults = accountAjfService.suggestList(suggestRequest.getKeyword());
+//
+//        return suggestResults;
+//
+//    }
 }

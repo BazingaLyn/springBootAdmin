@@ -4,6 +4,7 @@
 <head th:include="console/header">
 </head>
 <body>
+
 <section class="content-header">
     <h1>底层资源管理</h1>
     <small>艾积分管理</small>
@@ -21,11 +22,15 @@
                 <div class="box-body pad table-responsive">
                     <p>过滤条件</p>
                     <div  id="searchDiv" class="input-group col-md-6">
-                        <input type="text" name="q" class="form-control" placeholder="Search..."/>
-                        <span class="input-group-btn">
-                            <button type="submit" name="search" id="search-btn" class="btn btn-flat"><i class="fa fa-search"></i>
+                        <form id="searchform" class="navbar-form navbar-right" role="search" target="_blank" method="get" onkeydown="if(event.keyCode==13){gosubmit();}">
+                            <div class="form-group">
+                                <input type="text" id="searchWords" name="searchWords" class="form-control" data-provide="typeahead" autocomplete="off" placeholder="请输入要搜索关键词">
+                            </div>
+                            <input type="hidden" id="topicId" name="topicId" path="labelId"/>
+                            <button type="submit" class="btn" id="searchbtn">
+                                搜索
                             </button>
-                        </span>
+                        </form>
                     </div>
                 </div>
             </div>
@@ -38,10 +43,12 @@
 </div>
 <div th:include="console/footer"></div>
 </body>
+<script type="text/javascript" src="/static/js/bootstrap-typeahead.js"></script>
 <script type="text/javascript">
     $table = $("#dataGrid");
     $(function () {
         initDataGrid();
+
 
 //        $("#searchDiv input[type="text"]").suggestion({
 //            url:'/bazinga/suggestList',
@@ -52,6 +59,76 @@
 //            }
 //        });
     });
+
+    function gosubmit(){
+
+        $('#searchWords').bind('keypress',function(event){
+            if(event.keyCode == "13"){
+                console.info($('#searchWords').val());
+            }
+
+        });
+
+//        $('#searchWords').typeahead({
+//            source: function (query, process) {
+//
+//                return $.ajax({
+//                    url: '/bazinga/suggestList',
+//                    type: 'post',
+//                    data: {topicName: query},
+//                    dataType: 'json',
+//                    success: function (result) {
+//                        console.info(result);
+//                        // 这里的数据解析根据后台传入格式的不同而不同
+//                        if(result.code == "1") {
+//                            var json = result.data;
+//                            var resultList = new Array();
+//                            $.each(json,function (index,content) {
+//                                var aItem = { id: content.keyword, name: content.mainSuggestKeyword };
+//                                console.info(aItem);
+//                                resultList.push(JSON.stringify(aItem));
+//                            })
+//                            console.info(resultList);
+//                            return process(resultList);
+//                        }
+//                    }
+//                });
+//            },
+//            matcher: function (obj) {
+//                var item = JSON.parse(obj);
+//                return ~item.name.toLowerCase().indexOf(this.query.toLowerCase())
+//            },
+//
+//            sorter: function (items) {
+//                var beginswith = [], caseSensitive = [], caseInsensitive = [], item;
+//                while (aItem = items.shift()) {
+//                    var item = JSON.parse(aItem);
+//                    if (!item.name.toLowerCase().indexOf(this.query.toLowerCase()))
+//                        beginswith.push(JSON.stringify(item));
+//                    else if (~item.name.indexOf(this.query)) caseSensitive.push(JSON.stringify(item));
+//                    else caseInsensitive.push(JSON.stringify(item));
+//                }
+//
+//                return beginswith.concat(caseSensitive, caseInsensitive)
+//
+//            },
+//
+//            highlighter: function (obj) {
+//                var item = JSON.parse(obj);
+//                var query = this.query.replace(/[\-\[\]{}()*+?.,\\\^$|#\s]/g, '\\$&')
+//                return item.name.replace(new RegExp('(' + query + ')', 'ig'), function ($1, match) {
+//                    return '<strong>' + match + '</strong>'
+//                })
+//            },
+//
+//            updater: function (obj) {
+//                var item = JSON.parse(obj);
+//                $('#topicId').attr('value', item.id);
+//                return item.name;
+//            }
+//
+//        })
+    }
     function initDataGrid(){
         $table.bootstrapTable({
             height : tableModel.getHeight(),
